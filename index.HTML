@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>ManipDOM</title>
+</head>
+
+<body>
+
+<div id ="board"></div>  <!-- div pour contenir les boites -->
+    
+<script>
+
+// function pour melanger les enfant d'un element 
+
+function shuffleChildren(parent){       
+    console.log(parent)           
+    let children = parent.children                      // recupere la liste des enfants de l'element parent
+    let i = children.length, k , temp                  // initialise i a la fin de la liste , k pour le stockage , temp pour l'echange 
+    
+        while(--i > 0){                                // boucle a  travers la liste des enfants 
+            k = Math.floor(Math.random() * (i+1))      // genere un nombre aleatoire base sur i
+        temp = children[k]                             // echange  les positions des elements i et k
+        children[k] = children[i]
+            parent.appendChild(temp)                   // place temp (element a la pos k ) a la place du parent
+    }
+}
+
+//fonction pour afficher les reaction en fonction du type de boites ( succes error notice)
+function showReaction(type,clickedBox){
+     clickedBox.classList.add(type)
+     if(type !=="success"){
+        setTimeout(function(){
+            clickedBox.classList.remove(type)
+        },800)
+    }
+}
+
+// creation d'une boite de base
+
+const box = document.createElement("div")     
+box.classList.add("box")
+
+const board = document.querySelector("#board") // selection du tableau par son id 
+    
+// Demande du nombre de boites au joueur
+const initialBoxCount = prompt("Entrez le nombre de boîtes :");
+
+// Verification que la valeur entree est un nombre
+    
+const boxCount = parseInt(initialBoxCount);
+    if (!isNaN(boxCount) && boxCount > 0) {
+        let nb = 1 ; // Compteur pour suivre la progression du joueur
+        let startTime; // Enregistre le moment ou le joueur commence
+        let timer; // Variable pour stocker le timer 
+
+     // Function pour demarrer le timer
+        function startTimer() {
+            startTime = new Date();
+            timer = setInterval(updateTimer, 1000);
+    }
+
+    // Function pour mettre a jour le timer
+
+        function updateTimer() {
+        const elapsedTime = Math.floor((new Date() - startTime) / 1000);
+            // console.log("Temps écoulé : " + elapsedTime + " secondes");
+    }
+
+    // Function pour arreter le timer
+        function stopTimer() {
+            clearInterval(timer);
+    }
+        startTimer(); // Demarrer le timer des le debut du jeu
+
+// boucle pour creer et ajouter le nombre de boites demande
+
+    for(let i = 1; i <= boxCount; i++){           
+        const newbox = box.cloneNode()           // clonage de la boite de base
+        newbox.innerText = i                // attribution d'un numero a la boite 
+        board.appendChild(newbox)        // ajout de la boite au tableau 
+
+        newbox.addEventListener("click", function(){ // ajout d'un gestionnaire de click a chaque boite
+            
+             //   Si nb est egal au nombre de boites de jeu, c'est que le dernier clic etait sur
+            //   la dernoire boite --> victoire du joueur ! ( il ne faut pas incrementer nb avant !)                
+             if(i == nb){
+                shuffleChildren(board)
+                newbox.classList.add("box-valid")
+
+                if(nb == boxCount){
+                    board.querySelectorAll(".box").forEach(function(box){
+                        showReaction("success", box) // remelange boite a chaque clic valide
+                    }); 
+                        stopTimer(); // Arreter le timer en cas de victoire
+                        alert("Félicitations ! Vous avez gagné en " + Math.floor((new Date() - startTime) / 1000) + " secondes.");
+                        nb = 1;
+                
+                        startTimer(); // Redemarrer le timer pour la prochaine partie
+                      }
+                        else {
+                            nb++;
+                    }
+                }
+                 
+                // Si le numero de la boite est superieur a nb, c'est que le joueur a clique une boite trop elevee --> game // over !
+                else if( i > nb) {
+                    shuffleChildren(board)
+                    showReaction("error", newbox)
+                    nb =1;
+                    board.querySelectorAll(".box-valid").forEach(function(validBox){
+                    validBox.classList.remove("box-valid")
+                });
+                    // RemelangeBoites(); // remelange les boites en cas d'erreur
+                }
+                
+                //   Derniere possibilite : le joueur a clique sur une  boite deja grisee. On l'informe simplement de cela, le 
+                // jeu ne redemarre pas
+                else {
+                    showReaction("notice", newbox);
+                }
+
+        })
+    }
+
+    shuffleChildren(board); // Melange des enfants du tableau
+       } else {
+           alert("Veuillez entrer un nombre valide de boites.");
+       }
+
+    // let i = board.children.length, k , temp
+    // while(--i > 0){ // on boucle tant que 1 ote de i est toujours positif
+    //     // k stocke un nombez aleatoire baser sur i
+
+    //     k = Math.floor(Math.random() * (i+1))
+    //     // temp poite temporairement l'element a la position k dans board 
+
+    //     temp = board.children[k]
+    //     // remplace lelement a la possition k par l'element a la position i 
+
+    //     board.children[k] = board.children[i]
+    //     // place l'element k pointe temporairement a la fin du contenu de board
+    //     board.appendChild(temp)
+   
+   </script>
+</body>
+</html>
